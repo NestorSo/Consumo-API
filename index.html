@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://rickandmortyapi.com/favicon-32x32.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Web: Consumo de Rick & Morty API | TypeScript + Tailwind</title>
+    <!-- Google Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+    <!-- Navbar Superior -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+            <span class="material-icons text-2xl leading-none">&#xea4b;</span>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+              Rick & Morty <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">API Explorer</span>
+            </h1>
+            <p class="text-xs text-slate-400">Portal de consumo de Servicios Web REST en TypeScript</p>
+          </div>
+        </div>
+
+        <!-- Badges Técnicos -->
+        <div class="hidden sm:flex items-center gap-2">
+          <span class="text-xs px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/60 font-mono">
+            TypeScript v6
+          </span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/30 font-mono">
+            Tailwind CSS
+          </span>
+          <a
+            href="https://rickandmortyapi.com/documentation"
+            target="_blank"
+            rel="noreferrer"
+            class="text-xs px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/40 transition-colors flex items-center gap-1.5"
+          >
+            <span>Doc API</span>
+            <span class="material-icons text-xs leading-none">&#xe89e;</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <!-- Banner de Métricas HTTP -->
+      <section class="rounded-2xl bg-slate-900/70 border border-slate-800 p-4 sm:p-5 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Panel de Telemetría HTTP</span>
+              <span id="metricMethodBadge" class="text-xs px-2 py-0.5 rounded font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                async / await
+              </span>
+            </div>
+            <p id="metricUrlText" class="text-xs font-mono text-slate-400 truncate max-w-xl">
+              https://rickandmortyapi.com/api/character
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <!-- Estado HTTP -->
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex flex-col">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Estado HTTP</span>
+              <span id="metricStatus" class="text-base font-bold text-emerald-400 font-mono mt-0.5">200 OK</span>
+            </div>
+            <!-- Latencia -->
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex flex-col">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Latencia</span>
+              <span id="metricLatency" class="text-base font-bold text-cyan-400 font-mono mt-0.5">-- ms</span>
+            </div>
+            <!-- Content Type -->
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex flex-col">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Content-Type</span>
+              <span id="metricContentType" class="text-xs font-bold text-amber-300 font-mono mt-1 truncate">application/json</span>
+            </div>
+            <!-- Resultados -->
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex flex-col">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Total Registros</span>
+              <span id="metricTotalCount" class="text-base font-bold text-purple-400 font-mono mt-0.5">--</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Barra de Filtros y Búsqueda -->
+      <section class="rounded-2xl bg-slate-900/50 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+          <!-- Input Búsqueda -->
+          <div class="lg:col-span-5 relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <span class="material-icons text-lg leading-none">&#xe8b6;</span>
+            </span>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search by character name (e.g. Rick, Morty, Summer)..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-100 placeholder-slate-500 text-sm outline-none transition-all"
+            />
+          </div>
+
+          <!-- Filtro de Estado (Visualmente en Inglés) -->
+          <div class="lg:col-span-3">
+            <select
+              id="statusFilter"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-200 text-sm outline-none transition-all cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              <option value="alive">Alive</option>
+              <option value="dead">Dead</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+
+          <!-- Filtro de Género (Visualmente en Inglés) -->
+          <div class="lg:col-span-2">
+            <select
+              id="genderFilter"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-200 text-sm outline-none transition-all cursor-pointer"
+            >
+              <option value="all">All Genders</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="genderless">Genderless</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+
+          <!-- Acciones de Búsqueda -->
+          <div class="lg:col-span-2 flex items-center gap-2">
+            <button
+              id="btnSearch"
+              class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <span class="material-icons text-base leading-none">&#xe8b6;</span>
+              <span>Consultar</span>
+            </button>
+            <button
+              id="btnReset"
+              title="Reset filters"
+              class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-all border border-slate-700 cursor-pointer active:scale-95 flex items-center justify-center"
+            >
+              <span class="material-icons text-base leading-none">&#xe5d5;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de Mecanismo de Petición -->
+        <div class="pt-2 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 font-medium">Mecanismo de Fetch:</span>
+            <div class="inline-flex rounded-lg p-1 bg-slate-950 border border-slate-800">
+              <button
+                id="btnModeAsync"
+                class="px-3 py-1 rounded-md text-xs font-medium transition-all bg-emerald-500 text-slate-950 shadow-sm cursor-pointer"
+              >
+                async / await
+              </button>
+              <button
+                id="btnModePromises"
+                class="px-3 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+              >
+                Promesas (.then)
+              </button>
+            </div>
+          </div>
+
+          <div class="text-slate-400" id="resultsSummary">
+            Cargando personajes...
+          </div>
+        </div>
+      </section>
+
+      <!-- Selector de Pestañas con Material Icons en Código Hex -->
+      <nav class="flex items-center gap-2 border-b border-slate-800 pb-2">
+        <button
+          class="tab-btn px-4 py-2 rounded-xl text-sm font-medium transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-pointer flex items-center gap-2"
+          data-tab="tab-gallery"
+        >
+          <span class="material-icons text-base leading-none">&#xe9b0;</span>
+          <span>Galería de Personajes</span>
+        </button>
+        <button
+          class="tab-btn px-4 py-2 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer flex items-center gap-2"
+          data-tab="tab-json"
+        >
+          <span class="material-icons text-base leading-none">&#xe1af;</span>
+          <span>Inspector JSON</span>
+        </button>
+        <button
+          class="tab-btn px-4 py-2 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer flex items-center gap-2"
+          data-tab="tab-guide"
+        >
+          <span class="material-icons text-base leading-none">&#xea19;</span>
+          <span>Guía de Consumo</span>
+        </button>
+      </nav>
+
+      <!-- Pestaña 1: Galería -->
+      <section id="tab-gallery" class="tab-pane block space-y-6">
+        <!-- Estado de Carga -->
+        <div id="loadingState" class="hidden py-16 text-center space-y-3">
+          <div class="inline-block w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+          <p class="text-sm text-slate-400">Consultando datos del servicio web...</p>
+        </div>
+
+        <!-- Estado de Error / Sin Resultados -->
+        <div id="errorState" class="hidden py-16 text-center space-y-3 bg-slate-900/40 rounded-2xl border border-rose-500/30 p-6">
+          <span class="material-icons text-5xl text-rose-400 leading-none">&#xe001;</span>
+          <h3 id="errorMessage" class="text-base font-semibold text-rose-400">No se encontraron personajes</h3>
+          <p class="text-xs text-slate-400 max-w-md mx-auto">
+            Verifica el nombre ingresado o cambia los filtros de búsqueda para consultar otros personajes en el multiverso.
+          </p>
+        </div>
+
+        <!-- Grid de Personajes -->
+        <div id="charactersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <!-- Renderizado dinámico desde main.ts -->
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800">
+          <div class="text-xs text-slate-400" id="paginationInfo">
+            Página 1 de 1
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              id="btnPrevPage"
+              disabled
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-slate-200 text-xs font-medium transition-all border border-slate-700 cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              <span class="material-icons text-xs leading-none">&#xe5c4;</span>
+              <span>Anterior</span>
+            </button>
+            <span id="currentPageBadge" class="text-xs px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 font-mono text-emerald-400">
+              1
+            </span>
+            <button
+              id="btnNextPage"
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-slate-200 text-xs font-medium transition-all border border-slate-700 cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              <span>Siguiente</span>
+              <span class="material-icons text-xs leading-none">&#xe5c8;</span>
+            </button>
+          </div>
+        </nav>
+      </section>
+
+      <!-- Pestaña 2: Inspector JSON -->
+      <section id="tab-json" class="tab-pane hidden space-y-4">
+        <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+          <span class="text-xs font-medium text-slate-300">Respuesta HTTP Cruda devuelta por la API:</span>
+          <button
+            id="btnCopyJson"
+            class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <span class="material-icons text-xs leading-none">&#xe14d;</span>
+            <span>Copiar JSON</span>
+          </button>
+        </div>
+        <pre class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-emerald-300 overflow-x-auto max-h-[600px] leading-relaxed" id="jsonOutput">
+{
+  "mensaje": "Realiza una consulta para inspeccionar el JSON de la API"
+}
+        </pre>
+      </section>
+
+      <!-- Pestaña 3: Guía Técnica de Consumo -->
+      <section id="tab-guide" class="tab-pane hidden space-y-4">
+        <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white mb-2">📚 Mecanismos de Consumo Web Abordados</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Este proyecto demuestra de forma práctica cómo consumir APIs REST utilizando la función nativa <code class="text-emerald-400 font-mono bg-slate-950 px-1.5 py-0.5 rounded">fetch()</code> de JavaScript/TypeScript, aplicando separación de responsabilidades con un archivo de servicio independiente y tipado estático con interfaces.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Bloque async/await -->
+            <div class="bg-slate-950/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+                <span>1.</span> async / await (Sintaxis Moderna)
+              </h3>
+              <p class="text-xs text-slate-400">
+                Pausa la ejecución de la función hasta que la promesa se resuelva, permitiendo escribir código asíncrono con estilo síncrono y legible.
+              </p>
+              <pre class="bg-slate-900 p-3 rounded-lg text-[11px] font-mono text-slate-300 overflow-x-auto">
+async function getCharacters() {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.statusText);
+    const data: ApiResponse = await res.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}</pre>
+            </div>
+
+            <!-- Bloque Promesas -->
+            <div class="bg-slate-950/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <h3 class="text-sm font-semibold text-indigo-400 flex items-center gap-2">
+                <span>2.</span> Promesas (.then / .catch)
+              </h3>
+              <p class="text-xs text-slate-400">
+                Encadenamiento funcional donde cada <code class="text-indigo-300">.then()</code> procesa el resultado del paso anterior y <code class="text-indigo-300">.catch()</code> captura cualquier fallo de red.
+              </p>
+              <pre class="bg-slate-900 p-3 rounded-lg text-[11px] font-mono text-slate-300 overflow-x-auto">
+function getCharacters() {
+  fetch(url)
+    .then(res => res.json())
+    .then((data: ApiResponse) => {
+      render(data);
+    })
+    .catch(error => {
+      mostrarError(error);
+    });
+}</pre>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 space-y-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Ventajas de TypeScript + Tailwind CSS</h4>
+            <ul class="text-xs text-slate-400 space-y-1 list-disc list-inside">
+              <li><strong class="text-slate-200">Tipado Fuerte:</strong> Interfaces para la respuesta evitan errores de propiedades inexistentes y facilitan el autocompletado en el editor.</li>
+              <li><strong class="text-slate-200">Modularidad:</strong> La lógica de petición HTTP reside en <code class="text-emerald-400 font-mono">src/services/api.ts</code>, separada de la manipulación del DOM.</li>
+              <li><strong class="text-slate-200">Diseño Responsivo:</strong> Grid adaptable de 1 a 4 columnas sin escribir cientos de líneas de CSS manual.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal de Detalle de Personaje -->
+    <div id="characterModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+        <button
+          id="btnCloseModal"
+          class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-950/80 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition-colors cursor-pointer border border-slate-700"
+        >
+          <span class="material-icons text-base leading-none">&#xe5cd;</span>
+        </button>
+        <div id="modalContent" class="space-y-4">
+          <!-- Inyectado dinámicamente con TS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-xl shadow-lg font-medium text-xs hidden items-center gap-2">
+      <span class="material-icons text-base leading-none">&#xe86c;</span>
+      <span id="toastMessage">Copiado al portapapeles</span>
+    </div>
+
+    <!-- Pie de Página -->
+    <footer class="border-t border-slate-900 bg-slate-950/60 py-6 mt-12 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4">
+        Diseño de Sistemas de Internet • Consumo de Servicios Web Públicos con TypeScript & Tailwind CSS
+      </div>
+    </footer>
+
+    <!-- Script Principal de la Aplicación -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
